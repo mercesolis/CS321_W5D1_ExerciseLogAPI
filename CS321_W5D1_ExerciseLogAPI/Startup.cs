@@ -1,12 +1,15 @@
-﻿using CS321_W5D1_ExerciseLogAPI.Core.Models;
+﻿using System.Text;
+using CS321_W5D1_ExerciseLogAPI.Core.Models;
 using CS321_W5D1_ExerciseLogAPI.Core.Services;
 using CS321_W5D1_ExerciseLogAPI.Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CS321_W5D1_ExerciseLogAPI
 {
@@ -36,6 +39,24 @@ namespace CS321_W5D1_ExerciseLogAPI
             services.AddScoped<IActivityTypeService, ActivityTypeService>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+         .AddJwtBearer(options =>
+         {
+             options.TokenValidationParameters = new TokenValidationParameters
+             {
+                 ValidateIssuer = false,
+                 ValidateAudience = false,
+                 ValidateLifetime = true,
+                 ValidateIssuerSigningKey = true,
+                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+             };
+         });
+
         }
 
         // TODO: Class Project: Seed admin user
